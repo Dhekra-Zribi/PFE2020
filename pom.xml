@@ -11,7 +11,7 @@
 	<groupId>com.smpp</groupId>
 	<artifactId>App</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Receiver</name>
+	<name>Client SMPP</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
