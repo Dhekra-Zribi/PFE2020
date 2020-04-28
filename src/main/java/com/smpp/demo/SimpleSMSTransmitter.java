@@ -126,7 +126,7 @@ public class SimpleSMSTransmitter {
 				request.setDestAddr(destAddr);
 				request.setDataCoding((byte) 8);
 
-				//request.setEsmClass((byte) 64); // sms has UDH
+				request.setEsmClass((byte) 64); // sms has UDH
 
 				request.setShortMessage(shortMessage, "UTF-16");
 
