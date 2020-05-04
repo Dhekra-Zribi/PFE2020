@@ -59,6 +59,10 @@ public class SimpleSMSReceiver{
 				
 				if ((int)sms.getDataCoding() == 0 ) {
 					//message content is English Or Frensh (ASCII)
+					/*System.out.println("***** New Message Received *****");
+					System.out.println("From: " + sms.getSourceAddr().getAddress());
+					System.out.println("To: " + sms.getDestAddr().getAddress());
+					System.out.println("Content: " + sms.getShortMessage());*/
 					log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {}",
 							sms.getShortMessage().trim() ,
 							sms.getSourceAddr().getAddress(),sms.getDestAddr().getAddress() );

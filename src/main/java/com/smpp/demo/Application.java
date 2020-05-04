@@ -2,12 +2,27 @@ package com.smpp.demo;
 
 import java.util.Scanner;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
+
+
+
+
+//@EnableScheduling
 @SpringBootApplication
+//@EnableConfigurationProperties(ApplicationProperties.class)
 public class Application {
 
+/*	@Autowired
+	private ApplicationProperties properties ;
+	
+	private void test (ApplicationProperties properties) {
+		System.out.println(properties.getSmpp().getPort());
+	}*/
 	public static void main(String[] args) {
 
 		SpringApplication.run(Application.class, args);
@@ -30,7 +45,8 @@ public class Application {
 
 				SimpleSMSTransmitter objSimpleSMSTransmitter = new SimpleSMSTransmitter();
 				objSimpleSMSTransmitter.bindToSmscTransmitter();
-				objSimpleSMSTransmitter.sendSingleSMS();
+				//objSimpleSMSTransmitter.sendSingleSMS();
+				objSimpleSMSTransmitter.sendSMS();
 				break;
 				
 			case 2:

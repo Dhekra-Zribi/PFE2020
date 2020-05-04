@@ -15,6 +15,7 @@ import org.smpp.pdu.DeliverSM;
 import org.smpp.pdu.PDU;
 import org.smpp.pdu.SubmitSM;
 import org.smpp.pdu.SubmitSMResp;
+import org.smpp.util.ByteBuffer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -25,11 +26,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 
-@ConfigurationProperties("sms")
+//@ConfigurationProperties(prefix = "sms")
 public class SMSTransciever {
 
 	private Session session = null;
-//	@Value("${sms.host}")
+//	@Value("${sms.smpp.host}")
 	private String ipAddress = "127.0.0.1";
 
 	private String systemId = "smppclient1";
@@ -68,11 +69,13 @@ public class SMSTransciever {
 		
 		try {
 			
-			SubmitSM request = new SubmitSM();
-
+			
 			Address srcAddr = new Address();
 			Address destAddr = new Address();
-			
+
+			SubmitSM smRequest = new SubmitSM();
+			SubmitSMResp resp = null;
+
 			Scanner sc = new Scanner(System.in);
 			if (i==0) {
 				System.out.println("Write a message");
@@ -92,7 +95,6 @@ public class SMSTransciever {
 				sourceAddress = temp;
 			}
 			
-			// set values
 			srcAddr.setTon((byte) 1);
 			srcAddr.setNpi((byte) 1);
 			srcAddr.setAddress(sourceAddress);
@@ -101,17 +103,42 @@ public class SMSTransciever {
 			destAddr.setNpi((byte) 1);
 			destAddr.setAddress(destinationAddress);
 
-			request.setSourceAddr(srcAddr);
-			request.setDestAddr(destAddr);
-			request.setDataCoding((byte) 8);
-			
-			request.setShortMessage(shortMessage, "UTF-16");
+			if (shortMessage.length() <= 160) {
 
-			// send the request
-			SubmitSMResp resp = session.submit(request);
+				smRequest.setSourceAddr(srcAddr);
+				smRequest.setDestAddr(destAddr);
+				smRequest.setDataCoding((byte) 8);
+				smRequest.setShortMessage(shortMessage, "UTF-16");
+				resp = session.submit(smRequest);
+				if (resp.getCommandStatus() == Data.ESME_ROK) {
+					System.out.println("Message submitted....");
+				}
+			} else {
+				// SMS length > 160 Char
 
-			if (resp.getCommandStatus() == Data.ESME_ROK) {
-				System.out.println("Message submitted....");
+				smRequest.setEsmClass((byte) Data.SM_UDH_GSM); // Set UDHI Flag Data.SM_UDH_GSM=0x40
+
+				SimpleSMSTransmitter splitMsg = new SimpleSMSTransmitter();
+				String[] splittedMsg = splitMsg.SplitByWidth(shortMessage, 153);
+
+				int totalSegments = splittedMsg.length;
+
+				for (int i = 0; i < totalSegments; i++) {
+
+					ByteBuffer ed = new ByteBuffer();
+					ed.appendString(splittedMsg[i]);// , Data.ENC_ASCII
+
+					smRequest.setShortMessageData(ed);
+
+					smRequest.setSourceAddr(srcAddr);
+					smRequest.setDestAddr(destAddr);
+
+					resp = session.submit(smRequest);
+				}
+
+				if (resp.getCommandStatus() == Data.ESME_ROK) {
+					System.out.println("Long Message submitted....");
+				}
 			}
 			
 			PDU pdu = session.receive(1500);
@@ -120,21 +147,11 @@ public class SMSTransciever {
 				DeliverSM sms = (DeliverSM) pdu;
 				
 				if ((int)sms.getDataCoding() == 0 ) {
-					//message content is English Or Frensh (ASCII)
-					/*System.out.println("***** New Message Received *****");
-					System.out.println("From: " + sms.getSourceAddr().getAddress());
-					System.out.println("To: " + sms.getDestAddr().getAddress());
-					System.out.println("Content: " + sms.getShortMessage());*/
 					
 					log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {}", 
 							sms.getShortMessage().trim(), sms.getSourceAddr().getAddress(), sms.getDestAddr().getAddress() );
 				}
 				else if ((int)sms.getDataCoding() == 8 ) {
-					//message content is Non-English (Arabe, chinoi..)
-					/*System.out.println("***** New Message Received *****");
-					System.out.println("From: " + sms.getSourceAddr().getAddress());
-					System.out.println("To: " + sms.getDestAddr().getAddress());
-					System.out.println("Content: " + sms.getShortMessage(Data.ENC_UTF16));*/
 					
 					log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {}",
 							sms.getShortMessage(Data.ENC_UTF16).trim() ,sms.getSourceAddr().getAddress(),sms.getDestAddr().getAddress() );
