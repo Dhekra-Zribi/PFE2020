@@ -12,10 +12,12 @@ import org.smpp.pdu.BindRequest;
 import org.smpp.pdu.BindResponse;
 import org.smpp.pdu.BindTransciever;
 import org.smpp.pdu.DeliverSM;
+import org.smpp.pdu.Outbind;
 import org.smpp.pdu.PDU;
 import org.smpp.pdu.SubmitSM;
 import org.smpp.pdu.SubmitSMResp;
 import org.smpp.util.ByteBuffer;
+import org.smpp.util.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -103,6 +105,7 @@ public class SMSTransciever {
 			destAddr.setNpi((byte) 1);
 			destAddr.setAddress(destinationAddress);
 
+			int nb = 0;
 			if (shortMessage.length() <= 160) {
 
 				smRequest.setSourceAddr(srcAddr);
@@ -110,6 +113,7 @@ public class SMSTransciever {
 				smRequest.setDataCoding((byte) 8);
 				smRequest.setShortMessage(shortMessage, "UTF-16");
 				resp = session.submit(smRequest);
+				nb=1;
 				if (resp.getCommandStatus() == Data.ESME_ROK) {
 					System.out.println("Message submitted....");
 				}
@@ -134,6 +138,7 @@ public class SMSTransciever {
 					smRequest.setDestAddr(destAddr);
 
 					resp = session.submit(smRequest);
+					nb++;
 				}
 
 				if (resp.getCommandStatus() == Data.ESME_ROK) {
@@ -141,24 +146,39 @@ public class SMSTransciever {
 				}
 			}
 			
-			PDU pdu = session.receive(1500);
-
-			if (pdu != null) {
-				DeliverSM sms = (DeliverSM) pdu;
+			while (nb!=0) {
+				this.recive();
+				nb--;
 				
-				if ((int)sms.getDataCoding() == 0 ) {
-					
-					log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {}", 
-							sms.getShortMessage().trim(), sms.getSourceAddr().getAddress(), sms.getDestAddr().getAddress() );
-				}
-				else if ((int)sms.getDataCoding() == 8 ) {
-					
-					log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {}",
-							sms.getShortMessage(Data.ENC_UTF16).trim() ,sms.getSourceAddr().getAddress(),sms.getDestAddr().getAddress() );
-				}
 			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void recive() {
+		try {
+			
+		PDU pdu = session.receive(1500);
+
+		if (pdu != null) {
+			DeliverSM sms = (DeliverSM) pdu;
+			
+			if ((int)sms.getDataCoding() == 0 ) {
+				
+				log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {}", 
+						sms.getShortMessage().trim(), sms.getSourceAddr().getAddress(), sms.getDestAddr().getAddress() );
+			}
+			else if ((int)sms.getDataCoding() == 8 ) {
+				
+				log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {}",
+						sms.getShortMessage(Data.ENC_UTF16).trim() ,sms.getSourceAddr().getAddress(),sms.getDestAddr().getAddress() );
+			}
+		}
+	}
+		 catch (Exception e) {
+			 e.printStackTrace();
+			}
 	}
 }

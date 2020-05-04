@@ -61,6 +61,10 @@ public class Application {
 				objSMSTransciever.bindToSmscTransciever();
 				while (true) {
 					objSMSTransciever.transcieveSms();
+					/*while (true){
+						objSMSTransciever.recive();
+						
+					}*/
 				}
 				
 			case 4:
