@@ -1,4 +1,4 @@
-package com.smpp.demo;
+package com.smpp.demo.services;
 
 import java.util.Scanner;
 
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 
 
 //@ConfigurationProperties(prefix = "sms")
-public class SMSTransciever {
+public class TransceiverService {
 
 	private Session session = null;
 //	@Value("${sms.smpp.host}")
@@ -42,7 +42,7 @@ public class SMSTransciever {
 	private String sourceAddress;
 	private String destinationAddress;
 	private int i =0;
-	private static final Logger log = LoggerFactory.getLogger(SMSTransciever.class);
+	private static final Logger log = LoggerFactory.getLogger(TransceiverService.class);
 	
 
 	public void bindToSmscTransciever() {
@@ -122,7 +122,7 @@ public class SMSTransciever {
 
 				smRequest.setEsmClass((byte) Data.SM_UDH_GSM); // Set UDHI Flag Data.SM_UDH_GSM=0x40
 
-				SimpleSMSTransmitter splitMsg = new SimpleSMSTransmitter();
+				TransmitterService splitMsg = new TransmitterService();
 				String[] splittedMsg = splitMsg.SplitByWidth(shortMessage, 153);
 
 				int totalSegments = splittedMsg.length;

@@ -1,4 +1,4 @@
-package com.smpp.demo;
+package com.smpp.demo.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class SimpleSMSReceiver{
+public class ReceiverService{
 	
 	/*
 	 * Parameters used for connecting to SMSC (or SMPPSim)
@@ -24,7 +24,7 @@ public class SimpleSMSReceiver{
 	private String systemId = "smppclient1";
 	private String password = "password";
 	private int port = 2775;
-	private static final Logger log = LoggerFactory.getLogger(SimpleSMSReceiver.class);
+	private static final Logger log = LoggerFactory.getLogger(ReceiverService.class);
 	
 	
 	public void bindToSmscReceiver() {

@@ -1,37 +1,53 @@
 package com.smpp.demo;
 
-import java.util.Scanner;
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
+
+import com.smpp.demo.dao.SmsRepository;
+import com.smpp.demo.entities.Sms;
+
+import reactor.core.publisher.Mono;
 
 
 
+@SpringBootApplication()
 
+@EnableReactiveMongoRepositories(basePackages = "com.smpp.demo.dao")
 
-//@EnableScheduling
-@SpringBootApplication
-//@EnableConfigurationProperties(ApplicationProperties.class)
-public class Application {
+public class Application  {
 
-/*	@Autowired
-	private ApplicationProperties properties ;
-	
-	private void test (ApplicationProperties properties) {
-		System.out.println(properties.getSmpp().getPort());
-	}*/
+	@Autowired
+	SmsRepository smsRepository;
 	public static void main(String[] args) {
 
+		
 		SpringApplication.run(Application.class, args);
+	}
+		
+	@PostConstruct
+    public void  init()
+    		{
+      
+            Sms sms=new Sms();
+            sms.setShortMessage("message");
+            sms.setDestAddr(123);
+          Mono<Sms> sms1=smsRepository.save(sms);
+           System.out.println(sms1);
+           
+            
+                
+	}
+                
 
-		//SMSTransciever.configuration();
-			
+        
 		
-		
-		System.out.println("****Menu****");
+	/*System.out.println("****Menu****");
 		System.out.println("**** 1 For transmitter ****");
 		System.out.println("**** 2 For receiver ****");
 		System.out.println("**** 3 For transciver ****");
@@ -43,31 +59,32 @@ public class Application {
 			switch (choix) {
 			case 1:
 
-				SimpleSMSTransmitter objSimpleSMSTransmitter = new SimpleSMSTransmitter();
+				TransmitterService objSimpleSMSTransmitter = new TransmitterService();
 				objSimpleSMSTransmitter.bindToSmscTransmitter();
 				//objSimpleSMSTransmitter.sendSingleSMS();
 				objSimpleSMSTransmitter.sendSMS();
 				break;
 				
 			case 2:
-				SimpleSMSReceiver objSimpleSMSReceiver = new SimpleSMSReceiver();
+				ReceiverService objSimpleSMSReceiver = new ReceiverService();
 				objSimpleSMSReceiver.bindToSmscReceiver();
 				while (true) {
 					objSimpleSMSReceiver.receiveSms();
 				}
 
 			case 3:
-				SMSTransciever objSMSTransciever = new SMSTransciever();
+				TranscieverService objSMSTransciever = new TranscieverService();
 				objSMSTransciever.bindToSmscTransciever();
 				while (true) {
 					objSMSTransciever.transcieveSms();
+					//desactiver
 					/*while (true){
 						objSMSTransciever.recive();
 						
 					}*/
-				}
+				//}
 				
-			case 4:
+		/*	case 4:
 				System.out.println("Thank you :)");
 				System.exit(0);
 				break;
@@ -78,32 +95,16 @@ public class Application {
 				System.out.println("**** 3 For transciver ****");
 				System.out.println("**** 4 For exit ****");
 				choix = sc.nextInt();
-			}
+			
 		}
+        
+	
+}*/
 		
 		
 
-		/*
-		 * SMSTransciever objSMSTransciever = new SMSTransciever();
-		 * objSMSTransciever.bindToSmscTransciever(); 
-		 * while(true) {
-		 * objSMSTransciever.transcieveSms(); }
-		 */
 
-		/*
-		 * SimpleSMSTransmitter objSimpleSMSTransmitter = new SimpleSMSTransmitter();
-		 * objSimpleSMSTransmitter.bindToSmscTransmitter();
-		 * 
-		 * SimpleSMSReceiver objSimpleSMSReceiver = new SimpleSMSReceiver();
-		 * objSimpleSMSReceiver.bindToSmscReceiver();
-		 * 
-		 * objSimpleSMSTransmitter.sendSingleSMS();
-		 * 
-		 * while (true) { objSimpleSMSReceiver.receiveSms();
-		 * 
-		 * }
-		 */
-
+	
 	}
 
-}
+
