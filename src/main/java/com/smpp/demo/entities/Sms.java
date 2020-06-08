@@ -35,23 +35,23 @@ public class Sms  {
 	public void setShortMessage(String shortMessage) {
 		this.shortMessage = shortMessage;
 	}
-	public int getSourceAddr() {
+	public String getSourceAddr() {
 		return sourceAddr;
 	}
-	public void setSourceAddr(int sourceAddr) {
+	public void setSourceAddr(String sourceAddr) {
 		this.sourceAddr = sourceAddr;
 	}
-	public int getDestAddr() {
+	public String getDestAddr() {
 		return destAddr;
 	}
-	public void setDestAddr(int destAddr) {
+	public void setDestAddr(String destAddr) {
 		this.destAddr = destAddr;
 	}
 	@Id
 	private String id;
 	private  String shortMessage;
-	private int sourceAddr;
-	private int destAddr;
+	private String sourceAddr;
+	private String destAddr;
 	
 	
 	

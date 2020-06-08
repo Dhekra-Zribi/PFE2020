@@ -5,6 +5,8 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.function.Function;
 
+import javax.validation.Valid;
+
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +25,12 @@ import org.smpp.pdu.WrongLengthOfStringException;
 import org.smpp.pdu.tlv.TLV;
 import org.smpp.pdu.tlv.TLVException;
 import org.smpp.util.ByteBuffer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import com.smpp.demo.dao.SmsRepository;
 import com.smpp.demo.entities.Sms;
 
 import reactor.core.CoreSubscriber;
@@ -35,6 +40,10 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class TransmitterService {
+	
+	
+	@Autowired
+	SmsRepository repository;
 
 	/**
 	 * @param args
@@ -45,9 +54,9 @@ public class TransmitterService {
 	private String systemId = "smppclient1";
 	private String password = "password";
 	private int port = 2775;
-	private String shortMessage;
-	private String sourceAddress;
-	private String destinationAddress;
+	//private String shortMessage;
+	//private String sourceAddress;
+	//private String destinationAddress;
 
 	public void bindToSmscTransmitter() {
 		try {
@@ -68,8 +77,11 @@ public class TransmitterService {
 		}
 
 	}
+	
+	
+	
 
-	public void sendSMS() {
+	public void sendSMS(String shortMessage,String sourceAddress,String destinationAddress) {
 		try {
 			Address srcAddr = new Address();
 			Address destAddr = new Address();
@@ -77,14 +89,14 @@ public class TransmitterService {
 			SubmitSM smRequest = new SubmitSM();
 			SubmitSMResp resp = null;
 
-			Scanner sc = new Scanner(System.in);
+			/*Scanner sc = new Scanner(System.in);
 
 			System.out.println("Write a message \n");
 			shortMessage = sc.nextLine();
 			System.out.println("Write the source address \n");
 			sourceAddress = sc.nextLine();
 			System.out.println("Write the destination address \n");
-			destinationAddress = sc.nextLine();
+			destinationAddress = sc.nextLine();*/
 			
 			srcAddr.setTon((byte) 1);
 			srcAddr.setNpi((byte) 1);
@@ -136,22 +148,27 @@ public class TransmitterService {
 			System.out.println("Failed to submit message....");
 		}
 	}
+	
+public  Mono<Sms> create(@Valid @RequestBody Sms message) {
+        
+		return (Mono<Sms>) repository.save(message).subscribe();
+    }
 
-	public void sendSingleSMS() {
+	public void sendSingleSMS(String shortMessage,String sourceAddress,String destinationAddress) {
 		try {
 			SubmitSM request = new SubmitSM();
 
 			Address srcAddr = new Address();
 			Address destAddr = new Address();
 
-			Scanner sc = new Scanner(System.in);
+		/*	Scanner sc = new Scanner(System.in);
 
 			System.out.println("Write a message \n");
 			shortMessage = sc.nextLine();
 			System.out.println("Write the source address \n");
 			sourceAddress = sc.nextLine();
 			System.out.println("Write the destination address \n");
-			destinationAddress = sc.nextLine();
+			destinationAddress = sc.nextLine();*/
 
 			
 
@@ -180,6 +197,9 @@ public class TransmitterService {
 			if (resp.getCommandStatus() == Data.ESME_ROK) {
 				System.out.println("Message submitted....");
 				
+				
+				
+				
 			}
 			
 			
@@ -193,6 +213,12 @@ public class TransmitterService {
 			e.printStackTrace();
 			System.out.println("Failed to submit message....");
 		}
+		
+		
+		
+		
+		
+		
 	}
 	
 	
