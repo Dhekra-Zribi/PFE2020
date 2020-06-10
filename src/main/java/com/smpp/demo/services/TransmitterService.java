@@ -1,5 +1,6 @@
 package com.smpp.demo.services;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Random;
 import java.util.Scanner;
@@ -14,10 +15,13 @@ import org.smpp.Connection;
 import org.smpp.Data;
 import org.smpp.Session;
 import org.smpp.TCPIPConnection;
+import org.smpp.TimeoutException;
+import org.smpp.WrongSessionStateException;
 import org.smpp.pdu.Address;
 import org.smpp.pdu.BindRequest;
 import org.smpp.pdu.BindTransmitter;
 import org.smpp.pdu.BindTransmitterResp;
+import org.smpp.pdu.PDUException;
 import org.smpp.pdu.SubmitSM;
 import org.smpp.pdu.SubmitSMResp;
 import org.smpp.pdu.ValueNotSetException;
@@ -36,6 +40,8 @@ import com.smpp.demo.entities.Sms;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.DisposableServer;
+import reactor.netty.tcp.TcpServer;
 
 
 @Service
@@ -60,6 +66,16 @@ public class TransmitterService {
 
 	public void bindToSmscTransmitter() {
 		try {
+			
+		/*	DisposableServer server =
+	                TcpServer.create()
+	                         .host(ipAddress) 
+	                         .port(port)        
+	                         .bindNow();
+
+	        server.onDispose()
+	              .block();*/
+	        
 			Connection conn = new TCPIPConnection(ipAddress, port);
 			session = new Session(conn);
 
@@ -75,6 +91,7 @@ public class TransmitterService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 
 	}
 	
@@ -149,13 +166,13 @@ public class TransmitterService {
 		}
 	}
 	
-public  Mono<Sms> create(@Valid @RequestBody Sms message) {
+public  Mono<Sms>create(@Valid @RequestBody Sms message) {
         
 		return (Mono<Sms>) repository.save(message).subscribe();
     }
 
-	public void sendSingleSMS(String shortMessage,String sourceAddress,String destinationAddress) {
-		try {
+	public Mono<SubmitSMResp> sendSingleSMS(String shortMessage,String sourceAddress,String destinationAddress)throws ValueNotSetException, TimeoutException, PDUException, WrongSessionStateException, IOException  {
+	
 			SubmitSM request = new SubmitSM();
 
 			Address srcAddr = new Address();
@@ -191,28 +208,15 @@ public  Mono<Sms> create(@Valid @RequestBody Sms message) {
 		
 
 			// send the request
-			SubmitSMResp resp = session.submit(request);
-		
-
-			if (resp.getCommandStatus() == Data.ESME_ROK) {
-				System.out.println("Message submitted....");
-				
-				
-				
-				
-			}
+			 Mono<SubmitSMResp>resp=Mono.just(session.submit(request));
+			 resp.subscribe(i->System.out.println(i), 
+     				error -> System.err.println("Error: " + error),
+     				() -> System.out.println("Message submitted"));
 			
 			
 			
-			
-			
-
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-			System.out.println("Failed to submit message....");
-		}
+	
+		return resp;
 		
 		
 		

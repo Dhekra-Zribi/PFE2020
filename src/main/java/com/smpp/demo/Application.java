@@ -1,7 +1,13 @@
 package com.smpp.demo;
 
+import java.io.IOException;
+
 import javax.annotation.PostConstruct;
 
+import org.smpp.TimeoutException;
+import org.smpp.WrongSessionStateException;
+import org.smpp.pdu.PDUException;
+import org.smpp.pdu.ValueNotSetException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +17,9 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 
 import com.smpp.demo.dao.SmsRepository;
 import com.smpp.demo.entities.Sms;
+import com.smpp.demo.services.TransceiverService;
 import com.smpp.demo.services.TransmitterService;
+import com.smpp.demo.web.TransceiverController;
 import com.smpp.demo.web.TransmitterController;
 
 import reactor.core.publisher.Mono;
@@ -24,20 +32,35 @@ import reactor.core.publisher.Mono;
 
 public class Application  {
 
-	@Autowired
-	SmsRepository smsRepository;
-	public static void main(String[] args) {
+	
+	public static void main(String[] args)  {
 
 		
 		SpringApplication.run(Application.class, args);
 		
-		TransmitterController transmitter=new TransmitterController();
-						transmitter.sendOnemessage("hello","123","456");
+		
+					/*	
+						TransmitterService transmitter1=new TransmitterService();
+						transmitter1.bindToSmscTransmitter();
+						
+						TransmitterController transmitter=new TransmitterController();
+						transmitter.createMessage("hello","123","456");
+						
+		*/
+		
 		
 		
 		
 		
 	}
+	
+	/*public void init() {
+		TransceiverService  bind=new TransceiverService();
+		bind.bindToSmscTransciever();
+		
+		TransceiverController transceiver=new TransceiverController();
+		transceiver.sendMessage("hello", "123","456");
+	}*/
 	
 	
 	
@@ -48,7 +71,7 @@ public class Application  {
       
             Sms sms=new Sms();
             sms.setShortMessage("message");
-            sms.setDestAddr(123);
+            sms.setDestAddr("123");
           Mono<Sms> sms1=smsRepository.save(sms);
            System.out.println(sms1);
            

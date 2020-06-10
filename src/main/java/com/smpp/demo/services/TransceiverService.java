@@ -14,6 +14,7 @@ import org.smpp.pdu.BindTransciever;
 import org.smpp.pdu.DeliverSM;
 import org.smpp.pdu.Outbind;
 import org.smpp.pdu.PDU;
+import org.smpp.pdu.ShortMessage;
 import org.smpp.pdu.SubmitSM;
 import org.smpp.pdu.SubmitSMResp;
 import org.smpp.util.ByteBuffer;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -38,7 +40,7 @@ public class TransceiverService {
 	private String systemId = "smppclient1";
 	private String password = "password";
 	private int port = 2775;
-	private String shortMessage;
+	private String shortMessage="hello";
 	private String sourceAddress;
 	private String destinationAddress;
 	private int i =0;
@@ -67,7 +69,8 @@ public class TransceiverService {
 		}
 	}
 	
-	public void transcieveSms() {
+	
+	public void transcieveSms(String shortMessage,String sourceAddress,String destinationAddress) {
 		
 		try {
 			
@@ -78,7 +81,7 @@ public class TransceiverService {
 			SubmitSM smRequest = new SubmitSM();
 			SubmitSMResp resp = null;
 
-			Scanner sc = new Scanner(System.in);
+		/*	Scanner sc = new Scanner(System.in);
 			if (i==0) {
 				System.out.println("Write a message");
 				shortMessage = sc.nextLine();
@@ -95,7 +98,7 @@ public class TransceiverService {
 				temp = destinationAddress;
 				destinationAddress = sourceAddress;
 				sourceAddress = temp;
-			}
+			}*/
 			
 			srcAddr.setTon((byte) 1);
 			srcAddr.setNpi((byte) 1);
