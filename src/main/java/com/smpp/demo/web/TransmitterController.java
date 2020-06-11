@@ -27,10 +27,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
-
-@CrossOrigin(origins = "http://localhost:4200")
-@RequestMapping(value="transmitter")
-@RestController
 public class TransmitterController {
 	
 	
@@ -43,7 +39,7 @@ public class TransmitterController {
 		 
 	}*/
 	
-	@PostMapping("/message")
+/*	@PostMapping("/message")
     public ResponseEntity<Mono<@Valid Sms>>createMessage(@PathVariable String shortMessage, @PathVariable String sourceAddress,@PathVariable String destinationAddress  ) throws ValueNotSetException, TimeoutException, PDUException, WrongSessionStateException, IOException {
 		Sms sms=new Sms();
 		sms.setShortMessage(shortMessage);
@@ -68,7 +64,7 @@ public class TransmitterController {
 		 service.sendSingleSMS(shortMessage, sourceAddress, destinationAddress);
 		return service.create(sms) ;
 	}
-    
+    */
     
    
 	

@@ -1,28 +1,25 @@
 package com.smpp.demo.entities;
 
-
-
-import org.smpp.pdu.Address;
-import org.smpp.pdu.ShortMessage;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
-@Document(collection = "Sms")
+
 @AllArgsConstructor
-@NoArgsConstructor @ToString
-
+@NoArgsConstructor 
+@ToString
 @Builder
-
-
+@Document(collection = "Sms")
 public class Sms  {
+	@Id
+	private String id;
+	private  String shortMessage;
+	private String sourceAddr;
+	private String destAddr;
 	public String getId() {
 		return id;
 	}
@@ -47,11 +44,28 @@ public class Sms  {
 	public void setDestAddr(String destAddr) {
 		this.destAddr = destAddr;
 	}
-	@Id
-	private String id;
-	private  String shortMessage;
-	private String sourceAddr;
-	private String destAddr;
+	public Sms(String id, String shortMessage, String sourceAddr, String destAddr) {
+		super();
+		this.id = id;
+		this.shortMessage = shortMessage;
+		this.sourceAddr = sourceAddr;
+		this.destAddr = destAddr;
+	}
+	public Sms(String shortMessage, String sourceAddr, String destAddr) {
+		super();
+		this.shortMessage = shortMessage;
+		this.sourceAddr = sourceAddr;
+		this.destAddr = destAddr;
+	}
+	public Sms() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	@Override
+	public String toString() {
+		return "Sms [id= " + id + ", message= " + shortMessage + ", From= " + sourceAddr + ", To= "
+				+ destAddr + "]";
+	}
 	
 	
 	

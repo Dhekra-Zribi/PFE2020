@@ -13,7 +13,6 @@ import org.smpp.pdu.PDU;
 import org.springframework.stereotype.Component;
 
 
-@Component
 public class ReceiverService{
 	
 	/*

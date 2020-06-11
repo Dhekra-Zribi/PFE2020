@@ -1,5 +1,6 @@
 package com.smpp.demo.services;
-
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.slf4j.Logger;
@@ -28,11 +29,19 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.smpp.demo.dao.SmsRepository;
+import com.smpp.demo.entities.Sms;
+
+import lombok.extern.java.Log;
 
 
 //@ConfigurationProperties(prefix = "sms")
+@Service
 public class TransceiverService {
-
+	@Autowired
+	private SmsRepository smsRepository;
 	private Session session = null;
 //	@Value("${sms.smpp.host}")
 	private String ipAddress = "127.0.0.1";
@@ -69,8 +78,7 @@ public class TransceiverService {
 		}
 	}
 	
-	
-	public void transcieveSms(String shortMessage,String sourceAddress,String destinationAddress) {
+public void transcieveSms(String shortMessage,String sourceAddress,String destinationAddress) {
 		
 		try {
 			
@@ -107,13 +115,12 @@ public class TransceiverService {
 			destAddr.setTon((byte) 1);
 			destAddr.setNpi((byte) 1);
 			destAddr.setAddress(destinationAddress);
-
+			smRequest.setDataCoding((byte) 8);
 			int nb = 0;
 			if (shortMessage.length() <= 160) {
 
 				smRequest.setSourceAddr(srcAddr);
 				smRequest.setDestAddr(destAddr);
-				smRequest.setDataCoding((byte) 8);
 				smRequest.setShortMessage(shortMessage, "UTF-16");
 				resp = session.submit(smRequest);
 				nb=1;
@@ -125,8 +132,7 @@ public class TransceiverService {
 
 				smRequest.setEsmClass((byte) Data.SM_UDH_GSM); // Set UDHI Flag Data.SM_UDH_GSM=0x40
 
-				TransmitterService splitMsg = new TransmitterService();
-				String[] splittedMsg = splitMsg.SplitByWidth(shortMessage, 153);
+				String[] splittedMsg = this.SplitByWidth(shortMessage, 153);
 
 				int totalSegments = splittedMsg.length;
 
@@ -183,5 +189,68 @@ public class TransceiverService {
 		 catch (Exception e) {
 			 e.printStackTrace();
 			}
+	}
+	
+	public String[] SplitByWidth(String s, int width) throws Exception {
+		try {
+
+			if (width == 0) {
+				String[] ret = new String[1];
+				ret[0] = s;
+				return ret;
+			} else {
+
+				if (s.isEmpty())
+					return new String[0];
+				else {
+
+					if (s.length() <= width) {
+						String[] ret = new String[1];
+						ret[0] = s;
+						return ret;
+					} else {
+						int NumSeg = s.length() / width + 1;
+						String[] ret = new String[NumSeg];
+						int startPos = 0;
+
+						for (int i = 0; i < (NumSeg - 1); i++) {
+							ret[i] = s.substring(startPos, ((width * (i + 1))));
+							startPos = (i + 1) * width;
+							Log(ret[i]);
+
+						}
+						ret[NumSeg - 1] = s.substring(startPos, s.length());
+						return ret;
+					}
+				}
+			}
+
+		} catch (Exception e) {
+			Log(String.valueOf(e.fillInStackTrace()));
+			return new String[0];
+		}
+	}
+	private void Log(String valueOf) {
+		// TODO Auto-generated method stub
+
+	}
+
+	
+	public Sms create(String shortMessage,String sourceAddr, String destAddr) {
+		this.bindToSmscTransciever();
+		this.transcieveSms(shortMessage, sourceAddr, destAddr);
+		return smsRepository.save(new Sms(shortMessage, sourceAddr, destAddr));
+	}
+
+	public List<Sms> getAll(){
+		return smsRepository.findAll();
+	}
+	
+	public void deleteAll() {
+		smsRepository.deleteAll();
+	}
+	
+	public void delete(String id) {
+		smsRepository.deleteById(id);
 	}
 }

@@ -44,12 +44,11 @@ import reactor.netty.DisposableServer;
 import reactor.netty.tcp.TcpServer;
 
 
-@Service
 public class TransmitterService {
 	
 	
-	@Autowired
-	SmsRepository repository;
+	/*@Autowired
+	SmsRepository repository;*/
 
 	/**
 	 * @param args
@@ -166,10 +165,10 @@ public class TransmitterService {
 		}
 	}
 	
-public  Mono<Sms>create(@Valid @RequestBody Sms message) {
+/*public  Mono<Sms>create(@Valid @RequestBody Sms message) {
         
 		return (Mono<Sms>) repository.save(message).subscribe();
-    }
+    }*/
 
 	public Mono<SubmitSMResp> sendSingleSMS(String shortMessage,String sourceAddress,String destinationAddress)throws ValueNotSetException, TimeoutException, PDUException, WrongSessionStateException, IOException  {
 	
