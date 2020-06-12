@@ -26,7 +26,6 @@ import com.smpp.demo.services.TransceiverService;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequestMapping("/api")
 public class TransceiverController {
 
 	@Autowired
