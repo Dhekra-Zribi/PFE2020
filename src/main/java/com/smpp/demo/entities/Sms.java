@@ -1,6 +1,7 @@
 package com.smpp.demo.entities;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -15,15 +16,17 @@ import lombok.ToString;
 @Builder
 @Document(collection = "Sms")
 public class Sms  {
+	@Transient
+    public static final String SEQUENCE_NAME = "users_sequence";
 	@Id
-	private String id;
+	private long id;
 	private  String shortMessage;
 	private String sourceAddr;
 	private String destAddr;
-	public String getId() {
+	public long getId() {
 		return id;
 	}
-	public void setId(String id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 	public String getShortMessage() {
@@ -44,7 +47,7 @@ public class Sms  {
 	public void setDestAddr(String destAddr) {
 		this.destAddr = destAddr;
 	}
-	public Sms(String id, String shortMessage, String sourceAddr, String destAddr) {
+	public Sms(long id, String shortMessage, String sourceAddr, String destAddr) {
 		super();
 		this.id = id;
 		this.shortMessage = shortMessage;

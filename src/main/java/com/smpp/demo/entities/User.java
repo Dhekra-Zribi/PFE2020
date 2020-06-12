@@ -20,19 +20,21 @@ public class User {
     public static final String SEQUENCE_NAME = "users_sequence";
 	@Id
 	private long id;
-	private String emailId, userName, password;
-	public User(long id, String emailId, String userName, String password) {
+	private String emailId, userName, password, confirmPassword;
+	public User(long id, String emailId, String userName, String password, String confirmPassword) {
 		super();
 		this.id = id;
 		this.emailId = emailId;
 		this.userName = userName;
 		this.password = password;
+		this.confirmPassword = confirmPassword;
 	}
-	public User(String emailId, String userName, String password) {
+	public User(String emailId, String userName, String password, String confirmPassword) {
 		super();
 		this.emailId = emailId;
 		this.userName = userName;
 		this.password = password;
+		this.confirmPassword = confirmPassword;
 	}
 	public User() {
 		super();
@@ -62,9 +64,17 @@ public class User {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+	public String getConfirmPassword() {
+		return confirmPassword;
+	}
+	public void setConfirmPassword(String confirmPassword) {
+		this.confirmPassword = confirmPassword;
+	}
 	@Override
 	public String toString() {
-		return "User [id= " + id + ", emailId= " + emailId + ", userName= " + userName + ", password= " + password + "]";
+		return "User [id=" + id + ", emailId=" + emailId + ", userName=" + userName + ", password=" + password
+				+ ", confirmPassword=" + confirmPassword + "]";
 	}
+	
 	
 }

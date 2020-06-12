@@ -49,9 +49,9 @@ public class TransceiverService {
 	private String systemId = "smppclient1";
 	private String password = "password";
 	private int port = 2775;
-	private String shortMessage="hello";
-	private String sourceAddress;
-	private String destinationAddress;
+	/*private String shortMessage=null;
+	private String sourceAddress=null;
+	private String destinationAddress=null;*/
 	private int i =0;
 	private static final Logger log = LoggerFactory.getLogger(TransceiverService.class);
 	
@@ -78,7 +78,7 @@ public class TransceiverService {
 		}
 	}
 	
-public void transcieveSms(String shortMessage,String sourceAddress,String destinationAddress) {
+public Sms transcieveSms(Sms sms) {
 		
 		try {
 			
@@ -110,18 +110,19 @@ public void transcieveSms(String shortMessage,String sourceAddress,String destin
 			
 			srcAddr.setTon((byte) 1);
 			srcAddr.setNpi((byte) 1);
-			srcAddr.setAddress(sourceAddress);
+			srcAddr.setAddress(sms.getSourceAddr());
 
 			destAddr.setTon((byte) 1);
 			destAddr.setNpi((byte) 1);
-			destAddr.setAddress(destinationAddress);
+			destAddr.setAddress(sms.getDestAddr());
 			smRequest.setDataCoding((byte) 8);
+			String msg = sms.getShortMessage();
 			int nb = 0;
-			if (shortMessage.length() <= 160) {
+			if (msg.length() <= 160) {
 
 				smRequest.setSourceAddr(srcAddr);
 				smRequest.setDestAddr(destAddr);
-				smRequest.setShortMessage(shortMessage, "UTF-16");
+				smRequest.setShortMessage(msg, "UTF-16");
 				resp = session.submit(smRequest);
 				nb=1;
 				if (resp.getCommandStatus() == Data.ESME_ROK) {
@@ -132,7 +133,7 @@ public void transcieveSms(String shortMessage,String sourceAddress,String destin
 
 				smRequest.setEsmClass((byte) Data.SM_UDH_GSM); // Set UDHI Flag Data.SM_UDH_GSM=0x40
 
-				String[] splittedMsg = this.SplitByWidth(shortMessage, 153);
+				String[] splittedMsg = this.SplitByWidth(msg, 153);
 
 				int totalSegments = splittedMsg.length;
 
@@ -160,10 +161,12 @@ public void transcieveSms(String shortMessage,String sourceAddress,String destin
 				nb--;
 				
 			}
+			sms = smsRepository.save(sms);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return sms;
 	}
 	
 	public void recive() {
@@ -236,10 +239,10 @@ public void transcieveSms(String shortMessage,String sourceAddress,String destin
 	}
 
 	
-	public Sms create(String shortMessage,String sourceAddr, String destAddr) {
+	//public Sms create(String shortMessage,String sourceAddr, String destAddr) {
+	public Sms create(Sms sms) {
 		this.bindToSmscTransciever();
-		this.transcieveSms(shortMessage, sourceAddr, destAddr);
-		return smsRepository.save(new Sms(shortMessage, sourceAddr, destAddr));
+		return transcieveSms(sms);
 	}
 
 	public List<Sms> getAll(){
@@ -250,7 +253,7 @@ public void transcieveSms(String shortMessage,String sourceAddress,String destin
 		smsRepository.deleteAll();
 	}
 	
-	public void delete(String id) {
+	public void delete(long id) {
 		smsRepository.deleteById(id);
 	}
 }
