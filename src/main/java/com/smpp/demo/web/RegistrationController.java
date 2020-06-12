@@ -1,5 +1,7 @@
 package com.smpp.demo.web;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smpp.demo.entities.User;
 import com.smpp.demo.services.RegistrationService;
+import com.smpp.demo.services.SequenceGeneratorService;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -17,9 +20,14 @@ public class RegistrationController {
 
 	@Autowired
 	private RegistrationService service;
+	@Autowired
+	private SequenceGeneratorService sequenceGeneratorService;
 	
 	@PostMapping("/registerUser")
-	public User registerUser(@RequestBody User user) throws Exception {
+	public User registerUser(@Valid @RequestBody User user) throws Exception {
+
+		user.setId(sequenceGeneratorService.generateSequence(User.SEQUENCE_NAME));
+		
 		String tempEmailId = user.getEmailId();
 		if (tempEmailId != null && !"".equals(tempEmailId)) {
 			User userobj = service.fetchUserByEmailId(tempEmailId);
