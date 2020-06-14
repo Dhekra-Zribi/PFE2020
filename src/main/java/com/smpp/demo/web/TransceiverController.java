@@ -47,7 +47,7 @@ public class TransceiverController {
 		return service.getAll();
 	}
 	
-	@RequestMapping("/sms/delete")
+	@DeleteMapping("/smsdelete{id}")
 	public String delete(@RequestParam long id) {
 		service.delete(id);
 		return "Deleted "+id;
