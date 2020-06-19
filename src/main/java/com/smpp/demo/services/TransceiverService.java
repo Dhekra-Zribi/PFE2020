@@ -1,6 +1,10 @@
 package com.smpp.demo.services;
 import java.util.List;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Scanner;
 
 import org.slf4j.Logger;
@@ -161,6 +165,8 @@ public Sms transcieveSms(Sms sms) {
 				nb--;
 				
 			}
+			sms.setDate(asLocalDateTime().toLocalDate());
+			sms.setTime(asLocalDateTime().toLocalTime());
 			sms = smsRepository.save(sms);
 			
 		} catch (Exception e) {
@@ -179,13 +185,13 @@ public Sms transcieveSms(Sms sms) {
 			
 			if ((int)sms.getDataCoding() == 0 ) {
 				
-				log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {}", 
-						sms.getShortMessage().trim(), sms.getSourceAddr().getAddress(), sms.getDestAddr().getAddress() );
+				log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {} \n Date {}",
+						sms.getShortMessage().trim() ,sms.getSourceAddr().getAddress(),sms.getDestAddr().getAddress(), asLocalDateTime() );
 			}
 			else if ((int)sms.getDataCoding() == 8 ) {
 				
-				log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {}",
-						sms.getShortMessage(Data.ENC_UTF16).trim() ,sms.getSourceAddr().getAddress(),sms.getDestAddr().getAddress() );
+				log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {} \n Date {}",
+						sms.getShortMessage(Data.ENC_UTF16).trim() ,sms.getSourceAddr().getAddress(),sms.getDestAddr().getAddress(), asLocalDateTime() );
 			}
 		}
 	}
@@ -193,6 +199,13 @@ public Sms transcieveSms(Sms sms) {
 			 e.printStackTrace();
 			}
 	}
+	
+	private static LocalDateTime asLocalDateTime() {
+		Date date = new Date();
+        return Instant.ofEpochMilli(date.getTime()) //
+                .atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
+	
 	
 	public String[] SplitByWidth(String s, int width) throws Exception {
 		try {
