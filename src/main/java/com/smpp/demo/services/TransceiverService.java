@@ -3,6 +3,7 @@ import java.util.List;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
@@ -165,8 +166,10 @@ public Sms transcieveSms(Sms sms) {
 				nb--;
 				
 			}
-			sms.setDate(asLocalDateTime().toLocalDate());
-			sms.setTime(asLocalDateTime().toLocalTime());
+			
+			LocalDateTime datetime = LocalDateTime.now();  
+		    DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");   
+		    sms.setDateTime(datetime.format(format));
 			sms = smsRepository.save(sms);
 			
 		} catch (Exception e) {
@@ -185,13 +188,13 @@ public Sms transcieveSms(Sms sms) {
 			
 			if ((int)sms.getDataCoding() == 0 ) {
 				
-				log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {} \n Date {}",
-						sms.getShortMessage().trim() ,sms.getSourceAddr().getAddress(),sms.getDestAddr().getAddress(), asLocalDateTime() );
+				log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {}",
+						sms.getShortMessage().trim() ,sms.getSourceAddr().getAddress(),sms.getDestAddr().getAddress() );
 			}
 			else if ((int)sms.getDataCoding() == 8 ) {
 				
-				log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {} \n Date {}",
-						sms.getShortMessage(Data.ENC_UTF16).trim() ,sms.getSourceAddr().getAddress(),sms.getDestAddr().getAddress(), asLocalDateTime() );
+				log.info("\n ***** New Message Received ***** \n Content: {} \n From: {} \n To: {} ",
+						sms.getShortMessage(Data.ENC_UTF16).trim() ,sms.getSourceAddr().getAddress(),sms.getDestAddr().getAddress());
 			}
 		}
 	}
@@ -199,12 +202,6 @@ public Sms transcieveSms(Sms sms) {
 			 e.printStackTrace();
 			}
 	}
-	
-	private static LocalDateTime asLocalDateTime() {
-		Date date = new Date();
-        return Instant.ofEpochMilli(date.getTime()) //
-                .atZone(ZoneId.systemDefault()).toLocalDateTime();
-    }
 	
 	
 	public String[] SplitByWidth(String s, int width) throws Exception {
@@ -269,4 +266,5 @@ public Sms transcieveSms(Sms sms) {
 	public void delete(long id) {
 		smsRepository.deleteById(id);
 	}
+	
 }

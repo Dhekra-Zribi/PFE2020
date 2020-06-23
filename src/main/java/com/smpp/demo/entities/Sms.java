@@ -28,8 +28,7 @@ public class Sms  {
 	private  String shortMessage;
 	private String sourceAddr;
 	private String destAddr;
-	private LocalDate date;
-	private LocalTime time;
+	private String dateTime;
 	public long getId() {
 		return id;
 	}
@@ -54,46 +53,30 @@ public class Sms  {
 	public void setDestAddr(String destAddr) {
 		this.destAddr = destAddr;
 	}
-	
-	public LocalDate getDate() {
-		return date;
+	public String getDateTime() {
+		return dateTime;
 	}
-	public void setDate(LocalDate date) {
-		this.date = date;
-	}
-	
-	public LocalTime getTime() {
-		return time;
-	}
-	public void setTime(LocalTime time) {
-		this.time = time;
-	}
-	public Sms(long id, String shortMessage, String sourceAddr, String destAddr, LocalDate date, LocalTime time) {
-		super();
-		this.id = id;
-		this.shortMessage = shortMessage;
-		this.sourceAddr = sourceAddr;
-		this.destAddr = destAddr;
-		this.date = date;
-		this.time = time;
-	}
-	public Sms(String shortMessage, String sourceAddr, String destAddr, LocalDate date, LocalTime time) {
-		super();
-		this.shortMessage = shortMessage;
-		this.sourceAddr = sourceAddr;
-		this.destAddr = destAddr;
-		this.date = date;
-		this.time = time;
+	public void setDateTime(String dateTime) {
+		this.dateTime = dateTime;
 	}
 	public Sms() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	public Sms(long id, String shortMessage, String sourceAddr, String destAddr, String dateTime) {
+		super();
+		this.id = id;
+		this.shortMessage = shortMessage;
+		this.sourceAddr = sourceAddr;
+		this.destAddr = destAddr;
+		this.dateTime = dateTime;
+	}
 	@Override
 	public String toString() {
 		return "Sms [id=" + id + ", shortMessage=" + shortMessage + ", sourceAddr=" + sourceAddr + ", destAddr="
-				+ destAddr + ", date=" + date + "]";
+				+ destAddr + ", dateTime=" + dateTime + "]";
 	}
+	
 	
 	
 	
