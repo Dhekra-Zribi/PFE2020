@@ -32,6 +32,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -256,7 +257,7 @@ public Sms transcieveSms(Sms sms) {
 	}
 
 	public List<Sms> getAll(){
-		return smsRepository.findAll();
+		return smsRepository.findAll(Sort.by(Sort.Direction.DESC, "dateTime"));
 	}
 	
 	public void deleteAll() {
