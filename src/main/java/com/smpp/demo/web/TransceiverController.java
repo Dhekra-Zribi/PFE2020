@@ -1,5 +1,6 @@
 package com.smpp.demo.web;
 
+import java.util.HashMap;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.smpp.demo.entities.CountMsgDate;
 import com.smpp.demo.entities.Sms;
 import com.smpp.demo.entities.User;
 import com.smpp.demo.services.SequenceGeneratorService;
@@ -33,8 +35,13 @@ public class TransceiverController {
 	//public String create(@RequestParam String shortMessage, @RequestParam String sourceAddr, @RequestParam String destAddr) {
 	public Sms create(@Valid @RequestBody Sms sms) {
 		//Sms sms = service.create(shortMessage, sourceAddr, destAddr);
-		sms.setId(sequenceGeneratorService.generateSequence(User.SEQUENCE_NAME));
-		return service.create(sms);
+		sms.setId(sequenceGeneratorService.generateSequence(CountMsgDate.SEQUENCE_NAME));
+		Sms s = new Sms();
+		s = service.create(sms);
+		//nb msg per day
+		service.deleteAllNb();
+		service.countByDate();
+		 return s;
 	}
 	
 	@GetMapping("/sms")
@@ -53,5 +60,19 @@ public class TransceiverController {
 		service.deleteAll();
 		return "Deleted all records";
 	}
+	
+	@GetMapping("/count")
+	//public long count(@RequestParam String dateTime) {
+	public long count() {
+		return service.count();
+	}
+	
+	
+	@GetMapping("/nb")
+	public List<CountMsgDate> getNb(){
+		return service.getNb();
+	}
+	
+	
 	
 }

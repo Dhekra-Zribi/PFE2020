@@ -29,6 +29,7 @@ public class Sms  {
 	private String sourceAddr;
 	private String destAddr;
 	private String dateTime;
+	private String time;
 	public long getId() {
 		return id;
 	}
@@ -58,6 +59,13 @@ public class Sms  {
 	}
 	public void setDateTime(String dateTime) {
 		this.dateTime = dateTime;
+	}
+	
+	public String getTime() {
+		return time;
+	}
+	public void setTime(String time) {
+		this.time = time;
 	}
 	public Sms() {
 		super();

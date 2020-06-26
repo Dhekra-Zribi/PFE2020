@@ -7,6 +7,5 @@ import com.smpp.demo.entities.Sms;
 
 @Repository
 public interface SmsRepository extends MongoRepository<Sms, Long> {
-	
-
+	 
 }
