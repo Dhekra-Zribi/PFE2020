@@ -1,5 +1,10 @@
 package com.smpp.demo.entities;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -23,6 +28,8 @@ public class Sms  {
 	private  String shortMessage;
 	private String sourceAddr;
 	private String destAddr;
+	private String dateTime;
+	private String time;
 	public long getId() {
 		return id;
 	}
@@ -47,28 +54,38 @@ public class Sms  {
 	public void setDestAddr(String destAddr) {
 		this.destAddr = destAddr;
 	}
-	public Sms(long id, String shortMessage, String sourceAddr, String destAddr) {
-		super();
-		this.id = id;
-		this.shortMessage = shortMessage;
-		this.sourceAddr = sourceAddr;
-		this.destAddr = destAddr;
+	public String getDateTime() {
+		return dateTime;
 	}
-	public Sms(String shortMessage, String sourceAddr, String destAddr) {
-		super();
-		this.shortMessage = shortMessage;
-		this.sourceAddr = sourceAddr;
-		this.destAddr = destAddr;
+	public void setDateTime(String dateTime) {
+		this.dateTime = dateTime;
+	}
+	
+	public String getTime() {
+		return time;
+	}
+	public void setTime(String time) {
+		this.time = time;
 	}
 	public Sms() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	public Sms(long id, String shortMessage, String sourceAddr, String destAddr, String dateTime) {
+		super();
+		this.id = id;
+		this.shortMessage = shortMessage;
+		this.sourceAddr = sourceAddr;
+		this.destAddr = destAddr;
+		this.dateTime = dateTime;
+	}
 	@Override
 	public String toString() {
-		return "Sms [id= " + id + ", message= " + shortMessage + ", From= " + sourceAddr + ", To= "
-				+ destAddr + "]";
+		return "Sms [id=" + id + ", shortMessage=" + shortMessage + ", sourceAddr=" + sourceAddr + ", destAddr="
+				+ destAddr + ", dateTime=" + dateTime + "]";
 	}
+	
+	
 	
 	
 	
