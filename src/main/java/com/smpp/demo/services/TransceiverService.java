@@ -346,7 +346,7 @@ public Sms transcieveSms(Sms sms) {
 	}
 	
 	public List<CountMsgDate> getNb(){
-		return countRepo.findAll();
+		return countRepo.findAll(Sort.by(Sort.Direction.ASC, "date"));
 	}
 	
 	public void deleteAllNb() {
