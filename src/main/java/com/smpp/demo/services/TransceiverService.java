@@ -278,7 +278,7 @@ public Sms transcieveSms(Sms sms) {
 	}
 
 	public List<Sms> getAll(){
-		return smsRepository.findAll(Sort.by(Sort.Direction.DESC, "dateTime", "time"));
+		return smsRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
 	}
 	
 	public void deleteAll() {
