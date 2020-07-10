@@ -1,9 +1,16 @@
 package com.smpp.demo.entities;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import io.github.kaiso.relmongo.annotation.CascadeType;
+import io.github.kaiso.relmongo.annotation.FetchType;
+import io.github.kaiso.relmongo.annotation.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -21,6 +28,14 @@ public class User {
 	@Id
 	private long id;
 	private String emailId, userName, password, confirmPassword;
+	 
+	 @DBRef
+	  private Set<Role> roles = new HashSet<>();
+
+	 
+	 //@ManyToOne(mappedBy = "users", fetch=FetchType.LAZY)
+	 //private Role role;
+	 
 	public User(long id, String emailId, String userName, String password, String confirmPassword) {
 		super();
 		this.id = id;
@@ -36,6 +51,12 @@ public class User {
 		this.password = password;
 		this.confirmPassword = confirmPassword;
 	}
+	
+	 public User(String userName, String emailId, String password) {
+		    this.userName = userName;
+		    this.emailId = emailId;
+		    this.password = password;
+		  }
 	public User() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -69,6 +90,15 @@ public class User {
 	}
 	public void setConfirmPassword(String confirmPassword) {
 		this.confirmPassword = confirmPassword;
+	}
+	
+	
+	
+	public Set<Role> getRoles() {
+		return roles;
+	}
+	public void setRoles(Set<Role> roles) {
+		this.roles = roles;
 	}
 	@Override
 	public String toString() {

@@ -1,15 +1,20 @@
 package com.smpp.demo.web;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
-
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.smpp.demo.entities.Sms;
 import com.smpp.demo.entities.User;
 import com.smpp.demo.services.RegistrationService;
 import com.smpp.demo.services.SequenceGeneratorService;
@@ -52,5 +57,21 @@ public class RegistrationController {
 			throw new Exception("Bad credentials");
 		}
 		return userObj;
+	}
+	
+	@GetMapping("/profil")
+	private User profilUser(@Valid @RequestParam String emailId) {
+		return service.fetchUserByEmailId(emailId);
+	}
+	
+	@GetMapping("/users")
+	public List<User> getAllUsers(){
+		return service.getAllUsers();
+	}
+	
+	@DeleteMapping("/userdelete{id}")
+	public String delete(@RequestParam int id) {
+		service.delete(id);
+		return "Deleted "+id;
 	}
 }
