@@ -30,6 +30,7 @@ import com.smpp.demo.payload.response.JwtResponse;
 import com.smpp.demo.payload.response.MessageResponse;
 import com.smpp.demo.security.jwt.JwtUtils;
 import com.smpp.demo.security.services.UserDetailsImpl;
+import com.smpp.demo.services.SequenceGeneratorService;
 //@CrossOrigin(origins = "*", maxAge = 3600)
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -46,6 +47,9 @@ public class AuthController {
 
 	@Autowired
 	PasswordEncoder encoder;
+	
+	@Autowired
+	private SequenceGeneratorService sequenceGeneratorService;
 
 	@Autowired
 	JwtUtils jwtUtils;
@@ -97,7 +101,7 @@ public class AuthController {
 		} else {
 			strRoles.forEach(role -> {
 				switch (role) {
-				case "admin":
+				case "Administrator":
 					Role adminRole = roleRepository.findByName(ERole.Administrator)
 							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
 					roles.add(adminRole);
@@ -112,6 +116,7 @@ public class AuthController {
 			});
 		}
 		user.setRoles(roles);
+		user.setId(sequenceGeneratorService.generateSequence(User.SEQUENCE_NAME));
 		userRepository.save(user);
 
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
