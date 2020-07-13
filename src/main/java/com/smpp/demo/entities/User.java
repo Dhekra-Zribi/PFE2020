@@ -3,6 +3,8 @@ package com.smpp.demo.entities;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.validation.constraints.NotBlank;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -27,7 +29,11 @@ public class User {
     public static final String SEQUENCE_NAME = "users_sequence";
 	@Id
 	private long id;
-	private String emailId, userName, password, confirmPassword;
+	@NotBlank
+	private String userName ;
+	@NotBlank
+	private String password;
+	private String emailId , confirmPassword;
 	 
 	 @DBRef
 	  private Set<Role> roles = new HashSet<>();
