@@ -7,6 +7,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smpp.demo.entities.Csv;
@@ -42,17 +44,20 @@ public class TransceiverMultController {
 
 	@Autowired
 	private SequenceGeneratorService sequenceGeneratorService;
-	 List<String> files = new ArrayList<String>();
+	
 	 
 	
 	@RequestMapping(value="/sms/createMult",method=RequestMethod.POST,consumes = "multipart/form-data")
 	
-	public List<Sms> createMult(@Valid @RequestParam("file") MultipartFile file,@RequestParam("sms")String sms) throws JsonMappingException, IOException {
+	public void createMult(@Valid  @RequestParam("file") MultipartFile file ,@RequestParam("sms")String sms) throws JsonMappingException, IOException  {
+	//	ObjectMapper objectMapper=new ObjectMapper();
 		
-		
-        Sms sms1=new ObjectMapper().readValue(sms,Sms.class);
+    
+  Sms sms1=new ObjectMapper().readValue(sms,Sms.class);
         
-		return  service.createMult(file,sms1);
+		 service.createMult(file,sms1);
+		// csvservice.save(file);
+	
 	}
-		}
+}
 

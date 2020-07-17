@@ -34,16 +34,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-
+import com.smpp.demo.dao.CsvRepository;
 import com.smpp.demo.dao.SmsRepository;
 import com.smpp.demo.entities.Csv;
 import com.smpp.demo.entities.Sms;
+import com.smpp.demo.entities.User;
 
 @Service
 public class TransceiverMutipleService {
 	@Autowired
 	CsvReaderService service;
+	@Autowired
+	CsvRepository repository;
 	
+	@Autowired
+	private SequenceGeneratorService sequenceGeneratorService;
 	
 	@Autowired
 	private SmsRepository smsRepository;
@@ -80,8 +85,9 @@ public class TransceiverMutipleService {
 		}
 	}
 
-	public List<Sms> transcieveMultSms(MultipartFile file,Sms sms) {
+	public void transcieveMultSms(MultipartFile file,Sms sms) {
 
+		
 		try {
 
 			Address srcAddr = new Address();
@@ -89,14 +95,25 @@ public class TransceiverMutipleService {
 //			SubmitMultiSM message to the Message Center for onward delivery to multiple mobiles / short message entities (SME).
 			SubmitMultiSM smRequest = new SubmitMultiSM();
 			SubmitMultiSMResp resp = null;
-			srcAddr.setTon((byte) 1);
-			srcAddr.setNpi((byte) 1);
-			srcAddr.setAddress(sms.getSourceAddr());
+			String msg="";
+			
+			
+			
+				srcAddr.setTon((byte) 1);
+				srcAddr.setNpi((byte) 1);
+				srcAddr.setAddress(sms.getSourceAddr());
+				smRequest.setDataCoding((byte) 8);
+				msg = sms.getShortMessage();
+				//sms.get(i).setId(sequenceGeneratorService.generateSequence(User.SEQUENCE_NAME));
+				
+			
+			
 
-			smRequest.setDataCoding((byte) 8);
-			String msg = sms.getShortMessage();
+			
 			int nb = 0;
-			List<Csv> data=service.csvToTutorials(file.getInputStream());
+			
+			List<Csv>data=service.csvToTutorials(file.getInputStream());
+			List<Sms>smsList=new ArrayList<Sms>();
 			if (msg.length() <= 160) {
 
 				smRequest.setSourceAddr(srcAddr);
@@ -105,16 +122,19 @@ public class TransceiverMutipleService {
 				//String[][] csv =service.csvToTutorials();
 					for (int i = 0; i < data.size();i++) {
 						
+						
 					Address destAddr = new Address();
-
+					
 					destAddr.setTon((byte) 1);
 					destAddr.setNpi((byte) 1);
 					destAddr.setAddress(data.get(i).getDestAddr());
 					smRequest.addDestAddress(new DestinationAddress(destAddr));
+					smsList.add(new Sms(sequenceGeneratorService.generateSequence(User.SEQUENCE_NAME),sms.getShortMessage(),sms.getSourceAddr(),data.get(i).getDestAddr()));
 
 				}
 
 				smRequest.setShortMessage(msg, "UTF-16");
+				
 				resp = session.submitMulti(smRequest);
 				nb = 1;
 				if (resp.getCommandStatus() == Data.ESME_ROK) {
@@ -140,11 +160,13 @@ public class TransceiverMutipleService {
 
 					for (int i1 = 0; i1 < data.size(); i1++) {
 						Address destAddr = new Address();
+						
 
 						destAddr.setTon((byte) 1);
 						destAddr.setNpi((byte) 1);
 						destAddr.setAddress(data.get(i1).getDestAddr());
 						smRequest.addDestAddress(new DestinationAddress(destAddr));
+						smsList.add(new Sms(sequenceGeneratorService.generateSequence(User.SEQUENCE_NAME),sms.getShortMessage(),sms.getSourceAddr(),data.get(i).getDestAddr()));
 					}
 				}
 
@@ -154,6 +176,7 @@ public class TransceiverMutipleService {
 				if (resp.getCommandStatus() == Data.ESME_ROK) {
 					System.out.println("Long Message submitted....");
 				}
+		
 			}
 
 			while (nb != 0) {
@@ -161,14 +184,34 @@ public class TransceiverMutipleService {
 				nb--;
 
 			}
+			
+			smsRepository.saveAll(smsList);
+			
+			
+			
+		//service.save(file);
+			
+			/*while(!file.isEmpty()) {
+				//List<Csv> objectList=new ArrayList<>();
+				for (int i = 0; i < data.size(); i++) {
+					
+					repository.saveAll(data);
+				//objectList.add((Csv) data);
+				//service.save(file);
+			}
+				
+			} */
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		//a corrigé//
-		return  null;
+		
+		
+		
+	
 
 	}
+	 
 
 	public void recive() {
 		try {
@@ -243,9 +286,9 @@ public class TransceiverMutipleService {
 	
 	
 
-	public List<Sms> createMult(MultipartFile file, Sms sms) {
+	public void createMult(MultipartFile file, Sms sms) {
 		this.bindToSmscTransciever();
-		return transcieveMultSms(file,sms);
+		this.transcieveMultSms(file,sms);
 	}
 	
 	

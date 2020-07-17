@@ -82,6 +82,13 @@ public class Sms  {
 		this.destAddr = destAddr;
 		this.dateTime = dateTime;
 	}
+	
+	public Sms(long id, String shortMessage, String sourceAddr,String destAddr) {
+		this.id = id;
+		this.shortMessage = shortMessage;
+		this.sourceAddr = sourceAddr;
+		this.destAddr=destAddr;
+	}
 	@Override
 	public String toString() {
 		return "Sms [id=" + id + ", shortMessage=" + shortMessage + ", sourceAddr=" + sourceAddr + ", destAddr="

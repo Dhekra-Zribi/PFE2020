@@ -18,15 +18,19 @@ import java.util.stream.Collectors;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.smpp.demo.dao.CsvRepository;
 import com.smpp.demo.entities.Csv;
 import com.smpp.demo.entities.Sms;
 
 @Service
 public class CsvReaderService {
 	public static String TYPE = "text/csv";
+	@Autowired
+	CsvRepository repository;
 	 /*public static List<String> readCSV(String fileName) throws FileNotFoundException, IOException {
 	        List<String> data = new ArrayList<>();
 	        BufferedReader br = new BufferedReader(new FileReader("fileName"));
@@ -81,18 +85,17 @@ public class CsvReaderService {
 	 }*/
 	 
 	 
-	 public void save(MultipartFile file) {
-		    try {
-		      List<Csv> tutorials = this.csvToTutorials(file.getInputStream());
-		    //  repository.saveAll(tutorials);
-		    } catch (IOException e) {
-		      throw new RuntimeException("fail to store csv data: " + e.getMessage());
-		    }
-		  }
-
+	/*public void save(MultipartFile file) {
+	    try {
+	      List<Sms> content = this.csvToTutorials(file.getInputStream());
+	      repository.saveAll(content);
+	    } catch (IOException e) {
+	      throw new RuntimeException("fail to store csv data: " + e.getMessage());
+	    }
+	  }*/
 	 
 	 
-	 public static List<Csv> csvToTutorials(InputStream is) {
+	 public  List<Csv> csvToTutorials(InputStream is) {
 		    try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 		        CSVParser csvParser = new CSVParser(fileReader,
 		            CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
@@ -109,7 +112,10 @@ public class CsvReaderService {
 		            
 
 		        csvdata.add(tutorial);
+		       // repository.saveAll(csvdata);
+		       
 		      }
+		     
 
 		      return csvdata;
 		    } catch (IOException e) {
