@@ -2,6 +2,7 @@ package com.smpp.demo.services;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -40,5 +41,9 @@ public class RegistrationService {
 	}
 	public void delete(int id) {
 		repo.deleteById(id);
+	}
+	
+	public Optional<User> getUser(int id) {
+		return repo.findById(id);
 	}
 }
