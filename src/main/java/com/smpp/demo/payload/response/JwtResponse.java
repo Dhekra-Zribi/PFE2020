@@ -8,14 +8,17 @@ public class JwtResponse {
 	private String type = "Bearer";
 	private long id;
 	private String userName;
-	private String emailId;
+	private String emailId, mobile, phone;
 	private List<String> roles;
 
-	public JwtResponse(String accessToken, long id, String username, String email, List<String> roles) {
+	public JwtResponse(String accessToken, long id, String username, String email,String mobile,
+			String phone,List<String> roles) {
 		this.token = accessToken;
 		this.id = id;
 		this.userName = username;
 		this.emailId = email;
+		this.mobile = mobile;
+		this.phone=phone;
 		this.roles = roles;
 	}
 
@@ -62,5 +65,15 @@ public class JwtResponse {
 	public List<String> getRoles() {
 		return roles;
 	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+
+	public String getPhone() {
+		return phone;
+	}
+
 
 }

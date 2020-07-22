@@ -16,6 +16,11 @@ public class SignupRequest {
     
     private Set<String> roles;
     
+    
+    private String mobile;
+    
+    private String phone;
+    
     @NotBlank
     @Size(min = 6, max = 40)
     private String password;
@@ -48,8 +53,25 @@ public class SignupRequest {
       return this.roles;
     }
     
-    public void setRole(Set<String> roles) {
+    public void setRoles(Set<String> roles) {
       this.roles = roles;
     }
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+    
 
 }

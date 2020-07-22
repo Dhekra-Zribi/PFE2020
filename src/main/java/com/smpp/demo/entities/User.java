@@ -33,7 +33,7 @@ public class User {
 	private String userName ;
 	@NotBlank
 	private String password;
-	private String emailId , confirmPassword;
+	private String emailId , confirmPassword, mobile,phone;
 	 
 	 @DBRef
 	  private Set<Role> roles = new HashSet<>();
@@ -63,6 +63,14 @@ public class User {
 		    this.emailId = emailId;
 		    this.password = password;
 		  }
+	 public User(String userName, String emailId,String mobile,String phone, String password) {
+		    this.userName = userName;
+		    this.emailId = emailId;
+		    this.password = password;
+		    this.mobile=mobile;
+		    this.phone=phone;
+		  }
+	 
 	public User() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -105,6 +113,20 @@ public class User {
 	}
 	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
+	}
+	
+	
+	public String getMobile() {
+		return mobile;
+	}
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+	public String getPhone() {
+		return phone;
+	}
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 	@Override
 	public String toString() {
