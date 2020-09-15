@@ -27,12 +27,13 @@ import com.smpp.demo.entities.User;
 import com.smpp.demo.services.CsvReaderService;
 import com.smpp.demo.services.SequenceGeneratorService;
 import com.smpp.demo.services.TransceiverMutipleService;
+import com.smpp.demo.services.TransceiverService;
 
 
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequestMapping("/api/trxMult")
+@RequestMapping("/api/auth")
 public class TransceiverMultController {
 
 	
@@ -44,6 +45,8 @@ public class TransceiverMultController {
 
 	@Autowired
 	private SequenceGeneratorService sequenceGeneratorService;
+	@Autowired
+	TransceiverService service2;
 	
 	 
 	
@@ -56,6 +59,8 @@ public class TransceiverMultController {
   Sms sms1=new ObjectMapper().readValue(sms,Sms.class);
         
 		 service.createMult(file,sms1);
+		 service2.deleteAllNb();
+		service2.countByDate();
 		// csvservice.save(file);
 	
 	}

@@ -33,6 +33,7 @@ public class Sms  {
 	private String destAddr;
 	private String dateTime;
 	private String time;
+	private String type;
 	public long getId() {
 		return id;
 	}
@@ -70,17 +71,26 @@ public class Sms  {
 	public void setTime(String time) {
 		this.time = time;
 	}
+	
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
 	public Sms() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public Sms(long id, String shortMessage, String sourceAddr, String destAddr, String dateTime) {
+	public Sms(long id, String shortMessage, String sourceAddr, String destAddr, String dateTime, String time, String type) {
 		super();
 		this.id = id;
 		this.shortMessage = shortMessage;
 		this.sourceAddr = sourceAddr;
 		this.destAddr = destAddr;
 		this.dateTime = dateTime;
+		this.time = time;
+		this.type = type;
 	}
 	
 	public Sms(long id, String shortMessage, String sourceAddr,String destAddr) {
@@ -92,8 +102,9 @@ public class Sms  {
 	@Override
 	public String toString() {
 		return "Sms [id=" + id + ", shortMessage=" + shortMessage + ", sourceAddr=" + sourceAddr + ", destAddr="
-				+ destAddr + ", dateTime=" + dateTime + "]";
+				+ destAddr + ", dateTime=" + dateTime + ", time=" + time + ", type=" + type + "]";
 	}
+	
 	
 	
 	

@@ -44,9 +44,14 @@ public class TransceiverController {
 		 return s;
 	}
 	
-	@GetMapping("/sms")
+	@GetMapping("/Allsms")
 	public List<Sms> getAll(){
 		return service.getAll();
+	}
+	
+	@GetMapping("/sms")
+	public List<Sms> getAllTrx(){
+		return service.getAllTrx();
 	}
 	
 	@DeleteMapping("/smsdelete{id}")
@@ -65,6 +70,18 @@ public class TransceiverController {
 	//public long count(@RequestParam String dateTime) {
 	public long count() {
 		return service.count();
+	}
+	
+	@GetMapping("/count2")
+	//public long count(@RequestParam String dateTime) {
+	public long count2() {
+		return service.count2();
+	}
+	
+	@GetMapping("/count3")
+	//public long count(@RequestParam String dateTime) {
+	public long count3() {
+		return service.count3();
 	}
 	
 	

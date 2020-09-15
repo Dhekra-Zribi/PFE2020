@@ -1,6 +1,8 @@
 package com.smpp.demo;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
@@ -18,8 +20,10 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 
 import com.smpp.demo.dao.SmsRepository;
 import com.smpp.demo.entities.Sms;
+import com.smpp.demo.services.ReceiverService;
 import com.smpp.demo.services.TransceiverService;
 import com.smpp.demo.services.TransmitterService;
+import com.smpp.demo.web.ReceiverController;
 import com.smpp.demo.web.TransceiverController;
 import com.smpp.demo.web.TransmitterController;
 
@@ -30,19 +34,23 @@ import reactor.core.publisher.Mono;
 @SpringBootApplication
 public class Application  {
 
+	//@Autowired
+	//private  SmsRepository smsRepository;
+	
+
 	
 	public static void main(String[] args)  {
 
 		
 		SpringApplication.run(Application.class, args);
 		
+		
+		/*ReceiverService r = new ReceiverService();
+		r.recu();*/
 	}
-	
-	
-                
 
-   
 	
-	}
+}
+	
 
 

@@ -8,12 +8,14 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.xml.ws.soap.Addressing;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
+import org.springframework.security.config.authentication.PasswordEncoderParser;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +35,7 @@ import com.smpp.demo.entities.ERole;
 import com.smpp.demo.entities.Role;
 import com.smpp.demo.entities.User;
 import com.smpp.demo.payload.request.LoginRequest;
+import com.smpp.demo.payload.request.ResponseMessage;
 import com.smpp.demo.payload.request.SignupRequest;
 import com.smpp.demo.payload.response.JwtResponse;
 import com.smpp.demo.payload.response.MessageResponse;
@@ -57,6 +60,7 @@ public class AuthController {
 	@Autowired
 	PasswordEncoder encoder;
 	
+	
 	@Autowired
 	private SequenceGeneratorService sequenceGeneratorService;
 
@@ -71,38 +75,53 @@ public class AuthController {
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
-		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword()));
-
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-		String jwt = jwtUtils.generateJwtToken(authentication);
+		if (!userRepository.existsByUserName(loginRequest.getUserName())) {
+			return ResponseEntity
+					.badRequest()
+					.body(new MessageResponse("Username doesn't match any account!"));
+		}
 		
-		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
-		List<String> roles = userDetails.getAuthorities().stream()
-				.map(item -> item.getAuthority())
-				.collect(Collectors.toList());
+		
+		else {
+			Authentication authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword()));
 
-		return ResponseEntity.ok(new JwtResponse(jwt, 
-												 userDetails.getId(), 
-												 userDetails.getUsername(), 
-												 userDetails.getEmail(),
-												 userDetails.getMobile(),
-												 userDetails.getPhone(),
-												 roles));
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+			String jwt = jwtUtils.generateJwtToken(authentication);
+			
+			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
+			List<String> roles = userDetails.getAuthorities().stream()
+					.map(item -> item.getAuthority())
+					.collect(Collectors.toList());
+
+			
+			return ResponseEntity.ok(new JwtResponse(jwt, 
+													 userDetails.getId(), 
+													 userDetails.getUsername(), 
+													 userDetails.getEmail(),
+													 userDetails.getMobile(),
+													 userDetails.getPhone(),
+													 roles));
+		}
+	
+		
+
+		
 	}
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-		if (userRepository.existsByUserName(signUpRequest.getUserName())) {
-			return ResponseEntity
-					.badRequest()
-					.body(new MessageResponse("Error: Username is already taken!"));
-		}
-
 		if (userRepository.existsByEmailId(signUpRequest.getEmailId())) {
 			return ResponseEntity
 					.badRequest()
-					.body(new MessageResponse("Error: Email is already in use!"));
+					.body(new MessageResponse("Email is already in use!"));
 		}
+		else if (userRepository.existsByUserName(signUpRequest.getUserName())) {
+			return ResponseEntity
+					.badRequest()
+					.body(new MessageResponse("Username is already taken!"));
+		}
+
+		
 
 		// Create new user's account
 		User user = new User(signUpRequest.getUserName(), 
@@ -111,25 +130,26 @@ public class AuthController {
 							 signUpRequest.getPhone(),
 							 encoder.encode(signUpRequest.getPassword()));
 
+		user.setConfirmPassword(signUpRequest.getPassword());
 		Set<String> strRoles = signUpRequest.getRoles();
 		Set<Role> roles = new HashSet<>();
 		if (strRoles == null) {
-			Role userRole = roleRepository.findByName(ERole.User)
-					.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+			Role userRole = roleRepository.findByName(ERole.Personnel)
+					.orElseThrow(() -> new RuntimeException("Role is not found."));
 			roles.add(userRole);
 		} else {
 			strRoles.forEach(role -> {
 				switch (role) {
 				case "Administrator":
 					Role adminRole = roleRepository.findByName(ERole.Administrator)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+							.orElseThrow(() -> new RuntimeException("Role is not found."));
 					roles.add(adminRole);
 
 					break;
 				
 				default:
-					Role userRole = roleRepository.findByName(ERole.User)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+					Role userRole = roleRepository.findByName(ERole.Personnel)
+							.orElseThrow(() -> new RuntimeException("Role is not found."));
 					roles.add(userRole);
 				}
 			});
@@ -159,23 +179,83 @@ public class AuthController {
     }
 	
 	@PutMapping("/update{id}")
-    public void updateUser(@RequestParam int id, @Valid @RequestBody User userDetails) {
-        User user = repo.findById(id).get();
+    public ResponseEntity<?> updateUser(@RequestParam int id, @Valid @RequestBody SignupRequest userDetails) {
+		
+
+		User user = repo.findById(id).get();
+		if (!user.getEmailId().equals(userDetails.getEmailId())) {
+			if (userRepository.existsByEmailId(userDetails.getEmailId())) {
+				return ResponseEntity
+						.badRequest()
+						.body(new MessageResponse("Email is already in use!"));
+			}
+		}
+		else if (!user.getUserName().equals(userDetails.getUserName())) {
+			if (userRepository.existsByUserName(userDetails.getUserName())) {
+				return ResponseEntity
+						.badRequest()
+						.body(new MessageResponse("Username is already taken!"));
+			}
+		}
+		
+		
+		
+        
         user.setEmailId(userDetails.getEmailId());
         user.setUserName(userDetails.getUserName());
         user.setMobile(userDetails.getMobile());
         user.setPhone(userDetails.getPhone());
-        user.setRoles(userDetails.getRoles());
         
-        repo.save(user);
         
-       // final User updateduser = repo.save(user);
-        //return ResponseEntity.ok(updateduser);
+        Set<String> strRoles = userDetails.getRoles();
+		Set<Role> roles = new HashSet<>();
+		if (strRoles == null) {
+			Role userRole = roleRepository.findByName(ERole.Personnel)
+					.orElseThrow(() -> new RuntimeException("Role is not found."));
+			roles.add(userRole);
+		} else {
+			strRoles.forEach(role -> {
+				switch (role) {
+				case "Administrator":
+					Role adminRole = roleRepository.findByName(ERole.Administrator)
+							.orElseThrow(() -> new RuntimeException("Role is not found."));
+					roles.add(adminRole);
+
+					break;
+				
+				default:
+					Role userRole = roleRepository.findByName(ERole.Personnel)
+							.orElseThrow(() -> new RuntimeException("Role is not found."));
+					roles.add(userRole);
+				}
+			});
+		}
+		user.setRoles(roles);
+        
+        //user.setRoles(userDetails.getRoles());
+        
+        
+
+        final User updateduser = repo.save(user);
+        return ResponseEntity.ok(updateduser);
     }
 	
 	@GetMapping("/user{id}")
 	public Optional<User> getUser(@RequestParam int id){
 		return service.getUser(id);
+	}
+	
+	@GetMapping("pwd{password}")
+	public ResponseEntity<?> verifPwd(@RequestParam String password, @RequestParam int id) {
+		Optional<User> user = repo.findById(id);
+		String pwd = user.get().getConfirmPassword();
+		if(pwd.equals(password))
+		{
+			return ResponseEntity.ok(new ResponseMessage("Success, Your profil has been modified..."));
+		}
+		return ResponseEntity
+				.badRequest()
+				.body(new ResponseMessage("Failed Password!"));
 	}
 	
 	
