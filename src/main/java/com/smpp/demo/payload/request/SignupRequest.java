@@ -21,8 +21,8 @@ public class SignupRequest {
     
     private String phone;
     
-    @NotBlank
-    @Size(min = 6, max = 40)
+   // @NotBlank
+    //@Size(min = 6, max = 40)
     private String password;
   
     public String getUserName() {

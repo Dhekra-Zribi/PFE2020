@@ -1,23 +1,29 @@
 package com.smpp.demo.services;
 import java.util.List;
 import java.util.Map;
-import java.lang.reflect.Array;
-import java.security.KeyStore.Entry;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.Map.*;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import org.hibernate.validator.internal.engine.groups.Group;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.smpp.Data;
 import org.smpp.Session;
 import org.smpp.TCPIPConnection;
@@ -26,35 +32,22 @@ import org.smpp.pdu.BindRequest;
 import org.smpp.pdu.BindResponse;
 import org.smpp.pdu.BindTransciever;
 import org.smpp.pdu.DeliverSM;
-import org.smpp.pdu.Outbind;
 import org.smpp.pdu.PDU;
-import org.smpp.pdu.ShortMessage;
 import org.smpp.pdu.SubmitSM;
 import org.smpp.pdu.SubmitSMResp;
 import org.smpp.util.ByteBuffer;
-import org.smpp.util.Queue;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
-import org.springframework.data.mongodb.core.mapreduce.GroupBy;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import com.mongodb.operation.GroupOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import com.smpp.demo.dao.ConfigSmsc;
 import com.smpp.demo.dao.CountMsgDateRepository;
+import com.smpp.demo.dao.CountTrRepo;
 import com.smpp.demo.dao.SmsRepository;
 import com.smpp.demo.entities.CountMsgDate;
 import com.smpp.demo.entities.Sms;
 import com.smpp.demo.entities.User;
 
-import lombok.extern.java.Log;
 
 
 //@ConfigurationProperties(prefix = "sms")
@@ -65,15 +58,16 @@ public class TransceiverService {
 	@Autowired
 	private CountMsgDateRepository countRepo;
 	@Autowired
+	private CountTrRepo countTrRepo;
+	@Autowired
 	private SequenceGeneratorService sequenceGeneratorService;
-	
+	@Autowired ConfigSmscService smscService;
+	ConfigSmsc smsc = new ConfigSmsc();
 	private Session session = null;
-//	@Value("${sms.smpp.host}")
-	private String ipAddress = "127.0.0.1";
-
-	private String systemId = "smppclient1";
-	private String password = "password";
-	private int port = 2775;
+	private String ipAddress ;
+	private String systemId;
+	private String password ;
+	private int port;
 	/*private String shortMessage=null;
 	private String sourceAddress=null;
 	private String destinationAddress=null;*/
@@ -83,6 +77,11 @@ public class TransceiverService {
 
 	public void bindToSmscTransciever() {
 		try {
+			smsc = smscService.getSmsc();
+			ipAddress = smsc.getIpAddress();
+			port = smsc.getPort();
+			systemId= smsc.getSystemId();
+			password = smsc.getPassword();
 			// setup connection
 			TCPIPConnection connection = new TCPIPConnection(ipAddress, port);
 			connection.setReceiveTimeout(20 * 1000);
@@ -188,10 +187,12 @@ public Sms transcieveSms(Sms sms) {
 			}
 			
 			LocalDateTime datetime = LocalDateTime.now();  
-		    DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy");   
+		    DateTimeFormatter format = DateTimeFormatter.ofPattern("MM-dd-yyyy");   
 		    sms.setDateTime(datetime.format(format));
 		    DateTimeFormatter format2 = DateTimeFormatter.ofPattern("HH:mm:ss");
 		    sms.setTime(datetime.format(format2));
+		    sms.setType("trx");
+		    
 			sms = smsRepository.save(sms);
 			
 		} catch (Exception e) {
@@ -281,15 +282,38 @@ public Sms transcieveSms(Sms sms) {
 		return smsRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
 	}
 	
+	public List<Sms> getAllTrx(){
+		String type = "trx";
+		return smsRepository.findAllByTypeOrderByIdDesc(type);
+				//smsRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+	}
+	
 	public void deleteAll() {
 		smsRepository.deleteAll();
 	}
 	
 	public void delete(long id) {
+		Sms s = smsRepository.findById(id).get();
 		smsRepository.deleteById(id);
+		deleteAllNb();
+		countByDate();
+		//countRepo.deleteByDate(s.getDateTime());
+		//countTrRepo.deleteByDate(s.getDateTime());
 	}
 	
 	public long count()
+	{
+		List<Sms> list = smsRepository.findAllByTypeOrderByIdDesc("trx");
+		return list.size();
+	}
+	
+	public long count2()
+	{
+		List<Sms> list = smsRepository.findAllByTypeOrderByIdDesc("tr");
+		return list.size();
+	}
+	
+	public long count3()
 	{
 		return smsRepository.count();
 	}
@@ -302,13 +326,20 @@ public Sms transcieveSms(Sms sms) {
 		long nb=0;
 		HashMap<String, Long> hm = new HashMap<>();
 		
-		List<Sms> list = smsRepository.findAll(Sort.by(Sort.Direction.ASC, "dateTime"));
+		//List<Sms> list = smsRepository.findAll();
+		List<Sms> list = smsRepository.findAllByTypeOrderByIdDesc("trx");
 		for (int i = 0; i < list.size(); i++) {
+			
 			ch = list.get(i).getDateTime();
-			listeDate.add(list.get(i).getDateTime());		
+			
+			listeDate.add(ch);		
 		}
 		
-		for (String a : listeDate) {
+		//for (String a : listeDate) {
+		String a="";
+		for (int j = 0; j < listeDate.size(); j++) {
+			a = listeDate.get(j);
+			//System.out.println("a: "+a);
 		  if(hm.containsKey(a)) {
 		    hm.put(a, hm.get(a)+1);
 		  }
@@ -316,10 +347,13 @@ public Sms transcieveSms(Sms sms) {
 			  hm.put(a, (long) 1); 
 			  }
 		}
+		System.out.println("liste: "+hm);
+		System.out.println("tri: "+trierHashMap(hm));
+		//trierHashMap(hm);
 		
 		CountMsgDate countMsgDate = new CountMsgDate();
 		System.out.println("hashmap:");
-        Iterator iterator = hm.entrySet().iterator();
+        Iterator iterator = trierHashMap(hm).entrySet().iterator();
         while (iterator.hasNext()) {
           Map.Entry mapentry = (Map.Entry) iterator.next();
           System.out.println("clé: "+mapentry.getKey()
@@ -345,12 +379,35 @@ public Sms transcieveSms(Sms sms) {
 		
 	}
 	
+	 public static HashMap<String, Long> trierHashMap(Map<String, Long> hmap){
+	        List<Map.Entry<String, Long>> list =
+	           new LinkedList<Map.Entry<String, Long>>( hmap.entrySet() );
+	        Collections.sort( list, new Comparator<Map.Entry<String, Long>>(){
+	           public int compare
+	           (Map.Entry<String, Long>o1, Map.Entry<String, Long> o2 )
+	           {
+	              //comparer deux clés
+	              return (o1.getKey()).compareTo( o2.getKey() );
+	           }
+	        });
+        HashMap<String, Long> hmapTriee = new LinkedHashMap<String, Long>();
+        for (Map.Entry<String, Long> entry : list)
+        {
+            hmapTriee.put( entry.getKey(), entry.getValue() );
+        }
+        return hmapTriee;
+	 }
+	 
+	
 	public List<CountMsgDate> getNb(){
-		return countRepo.findAll(Sort.by(Sort.Direction.ASC, "date"));
+		//countByDate();
+		return countRepo.findAll(Sort.by(Sort.Direction.DESC, "id"));
 	}
 	
 	public void deleteAllNb() {
 		countRepo.deleteAll();
+		//countTrRepo.deleteAll();
+		//countByDate();
 	}
 	
 	

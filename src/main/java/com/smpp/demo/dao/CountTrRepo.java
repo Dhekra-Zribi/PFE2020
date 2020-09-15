@@ -3,10 +3,13 @@ package com.smpp.demo.dao;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-import com.smpp.demo.entities.CountMsgDate;
-@Repository
-public interface CountMsgDateRepository extends MongoRepository<CountMsgDate, Long>{
+import com.smpp.demo.entities.CountTr;
 
-	public CountMsgDate findByDate(String date);
+
+
+@Repository
+public interface CountTrRepo extends MongoRepository<CountTr, Long>{
+
+	public CountTr findByDate(String date);
 	void deleteByDate(String date);
 }

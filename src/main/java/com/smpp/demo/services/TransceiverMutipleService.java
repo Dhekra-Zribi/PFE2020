@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -34,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.smpp.demo.dao.ConfigSmsc;
 import com.smpp.demo.dao.CsvRepository;
 import com.smpp.demo.dao.SmsRepository;
 import com.smpp.demo.entities.Csv;
@@ -49,22 +52,28 @@ public class TransceiverMutipleService {
 	
 	@Autowired
 	private SequenceGeneratorService sequenceGeneratorService;
-	
+	@Autowired ConfigSmscService smscService;
+	ConfigSmsc smsc = new ConfigSmsc();
 	@Autowired
 	private SmsRepository smsRepository;
 	private Session session = null;
 
-	private String ipAddress = "127.0.0.1";
+	private String ipAddress ;
 
-	private String systemId = "smppclient1";
-	private String password = "password";
-	private int port = 2775;
+	private String systemId ;
+	private String password ;
+	private int port ;
 
 	private int i = 0;
 	private static final Logger log = LoggerFactory.getLogger(TransceiverMutipleService.class);
 
 	public void bindToSmscTransciever() {
 		try {
+			smsc = smscService.getSmsc();
+			ipAddress = smsc.getIpAddress();
+			port = smsc.getPort();
+			systemId= smsc.getSystemId();
+			password = smsc.getPassword();
 			// setup connection
 			TCPIPConnection connection = new TCPIPConnection(ipAddress, port);
 			connection.setReceiveTimeout(20 * 1000);
@@ -114,6 +123,14 @@ public class TransceiverMutipleService {
 			
 			List<Csv>data=service.csvToTutorials(file.getInputStream());
 			List<Sms>smsList=new ArrayList<Sms>();
+			
+			LocalDateTime datetime = LocalDateTime.now();  
+		    DateTimeFormatter format = DateTimeFormatter.ofPattern("MM-dd-yyyy");   
+		    sms.setDateTime(datetime.format(format));
+		    DateTimeFormatter format2 = DateTimeFormatter.ofPattern("HH:mm:ss");
+		    sms.setTime(datetime.format(format2));
+		    sms.setType("trx");
+		    
 			if (msg.length() <= 160) {
 
 				smRequest.setSourceAddr(srcAddr);
@@ -129,7 +146,8 @@ public class TransceiverMutipleService {
 					destAddr.setNpi((byte) 1);
 					destAddr.setAddress(data.get(i).getDestAddr());
 					smRequest.addDestAddress(new DestinationAddress(destAddr));
-					smsList.add(new Sms(sequenceGeneratorService.generateSequence(User.SEQUENCE_NAME),sms.getShortMessage(),sms.getSourceAddr(),data.get(i).getDestAddr()));
+					smsList.add(new Sms(sequenceGeneratorService.generateSequence(User.SEQUENCE_NAME),sms.getShortMessage(),sms.getSourceAddr(),data.get(i).getDestAddr(),
+							sms.getDateTime(),sms.getTime(),sms.getType()));
 
 				}
 
@@ -184,6 +202,7 @@ public class TransceiverMutipleService {
 				nb--;
 
 			}
+			
 			
 			smsRepository.saveAll(smsList);
 			
